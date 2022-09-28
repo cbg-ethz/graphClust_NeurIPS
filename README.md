@@ -9,10 +9,21 @@ Installation
 -----------
 
 In order to install the package, it suffices to launch
-`R CMD INSTALL path/to/netClust`
+```
+R CMD INSTALL path/to/netClust
+```
 from a terminal, or `make install` from within the package source folder.
 
 `netClust` requires R `>= 3.5`, and depends on 
 `BiDAG` (>= 2.0.2), `reshape2`, `pcalg`,
 `RBGL`, `clue` and `grDevices`.
 
+Simulations
+-----------
+
+**Figure 2** can be reproduced by running the script `simulations/figure_2-simulation.R`. The simulations can be modified and executed in the `simulations/cluster-scripts` folder.
+
+Pan-Cancer Data
+-----------
+
+**Figure 3** can be reproduced by runnign the script `tcga_analysis/figure_3-km_plot.R`. The results of **Table 1** can be reproduced by runnign the script `tcga_analysis/table_1-cox_analysis.R`. A reproducability analysis for a range of different seeds can be found in `tcga_analysis/reproducability_different_seeds`. The hyperparameters of the cluster algorithms can be modified and executed in the `tcga_analysis/clustering folder` folder.
