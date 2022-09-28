@@ -1,4 +1,4 @@
-netClust: Network-based clustering with covariate adjustment
+Network-Based Clustering of Pan-Cancer Data Accounting for Clinical Covariates
 -----------
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
