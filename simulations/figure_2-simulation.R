@@ -1,3 +1,6 @@
+
+# Prepare session, load packages
+rm(list=ls())
 library(ggpubr)
 library(ggplot2)
 library(RColorBrewer)
@@ -39,8 +42,8 @@ cols <- color_list[c(2,9,4,10,1,7,5,8,3)]
 # remove Mclust (since Gaussian mixture model not interesting for binary data)
 nbg_data_reduced <- nbg_data[!nbg_data$Method=="Mclust (cov & var)"&!nbg_data$Method=="Mclust (var)",]
 # create labels for publication
-levels(nbg_data_reduced$Method) <- c("Cov-adjust (cov. & var.)", "BMMM (cov. & var.)",
-                             "BMMM (var.)", "K-means (cov. & var.)", "K-means (var.)",
+levels(nbg_data_reduced$Method) <- c("Cov-adjust (cov. & var.)", "BNMM (cov. & var.)",
+                             "BNMM (var.)", "K-means (cov. & var.)", "K-means (var.)",
                              "MC", "MC2", "BMM (cov. & var.)", "BMM (var.)")
 
 color_list <- RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")
