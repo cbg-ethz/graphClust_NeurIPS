@@ -15,13 +15,13 @@ R CMD INSTALL path/to/netClust
 from a terminal, or `make install` from within the package source folder.
 
 `netClust` requires R `>= 3.5`, and depends on 
-`BiDAG` (>= 2.0.2), `reshape2`, `pcalg`,
+`pcalg`, `reshape2`, `BiDAG` (>= 2.0.2),
 `RBGL`, `clue` and `grDevices`.
 
 Simulations
 -----------
 
-**Figure 2** can be reproduced by running the script `simulations/figure_2-simulation.R`. The simulations can be modified and executed in the `simulations/cluster-scripts` folder.
+**Figure 2** can be reproduced by running the script `simulations/figure_2-simulation.R`. Analogously, **Figure 4** in the appendix can be reproduced by running the script `simulations/figure_4-simulation.R`. The simulations can be modified and executed in the `simulations/cluster-scripts` folder.
 
 Pan-Cancer Data
 -----------
