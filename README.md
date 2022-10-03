@@ -15,7 +15,7 @@ R CMD INSTALL path/to/netClust
 from a terminal, or `make install` from within the package source folder.
 
 `netClust` requires R `>= 3.5`, and depends on 
-`BiDAG` (>= 2.0.2), `reshape2`, `pcalg`,
+`pcalg`, `reshape2`, `BiDAG` (>= 2.0.2),
 `RBGL`, `clue` and `grDevices`.
 
 Simulations
