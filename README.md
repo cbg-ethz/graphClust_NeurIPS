@@ -21,7 +21,7 @@ from a terminal, or `make install` from within the package source folder.
 Simulations
 -----------
 
-**Figure 2** can be reproduced by running the script `simulations/figure_2-simulation.R`. Analogous, **Figure 4** in the appendix can be reproduced by running the script `simulations/figure_4-simulation.R`. The simulations can be modified and executed in the `simulations/cluster-scripts` folder.
+**Figure 2** can be reproduced by running the script `simulations/figure_2-simulation.R`. Analogously, **Figure 4** in the appendix can be reproduced by running the script `simulations/figure_4-simulation.R`. The simulations can be modified and executed in the `simulations/cluster-scripts` folder.
 
 Pan-Cancer Data
 -----------
