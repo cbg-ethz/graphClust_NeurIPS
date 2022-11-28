@@ -3,7 +3,7 @@ Network-Based Clustering of Pan-Cancer Data Accounting for Clinical Covariates
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-This repository contains the code to reproduce the results of the NeurIPS 2022 LMRL workshop submission "Network-Based Clustering of Pan-Cancer Data Accounting for Clinical Covariates".
+This repository contains the code to reproduce the results of the NeurIPS 2022 LMRL workshop paper "Network-Based Clustering of Pan-Cancer Data Accounting for Clinical Covariates".
 
 Installation
 -----------
