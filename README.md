@@ -20,6 +20,9 @@ Being hosted on GitHub, it is possible to use the `install_github`
 tool from an R session:
 
 ```
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install(c("Rgraphviz", "RBGL"))
+
 library("devtools")
 install_github("cbg-ethz/graphClust_NeurIPS")
 ```
