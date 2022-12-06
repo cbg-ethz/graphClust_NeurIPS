@@ -11,10 +11,18 @@ Installation
 -----------
 
 In order to install the package, it suffices to launch
-```
+`
 R CMD INSTALL path/to/netClust
-```
+`
 from a terminal, or `make install` from within the package source folder.
+
+Being hosted on GitHub, it is possible to use the `install_github`
+tool from an R session:
+
+```
+library("devtools")
+install_github("cbg-ethz/graphClust_NeurIPS")
+```
 
 `netClust` requires R `>= 3.5`, and depends on 
 `pcalg`, `reshape2`, `BiDAG` (>= 2.0.2),
