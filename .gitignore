@@ -4,3 +4,8 @@ summary_plot/figure_1/summary_plot.key
 .DS_Store
 tcga_analysis/reproducability_different_seeds/clustering/.Rhistory
 tcga_analysis/.DS_Store
+.Rhistory
+tcga_analysis/.RData
+simulations/.Rhistory
+simulations/presentation_figure_2-simulation.R
+tcga_analysis/presentation_figure_3-km_plot.R
