@@ -9,3 +9,4 @@ tcga_analysis/.RData
 simulations/.Rhistory
 simulations/presentation_figure_2-simulation.R
 tcga_analysis/presentation_figure_3-km_plot.R
+simulations/parallel_test.R
