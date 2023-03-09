@@ -201,7 +201,7 @@ bestAICsearch_test <- function(binaryMatrix, minK = 2, maxK=5, chiVec=c(1e-3,0.5
 
   meltdivergy<-melt(divergy)
 
-  if (plot_heatmap=TRUE){
+  if (plot_heatmap==TRUE){
     ggplot(data = meltdivergy, aes(x=Var1, y=Var2, fill=value)) +
        geom_tile()
 
