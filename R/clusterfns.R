@@ -156,45 +156,80 @@ getBestSeed <- function(assignprogress){
 #' @param myData Data to be clustered
 #' @param k_clust Number of clusters
 #' @param n_bg Number of covariates
-#' @param itLim Maximum number of iterations
+# #' @param itLim Maximum number of iterations
 #' @param EMseeds Seeds
 #' @param edgepmat Matrix of penalized edges in the search space
+#' @param blacklist Matrix of forbidden edges in the search space
 #' @param bdepar Hyperparameters for structure learning (BDE score)
 #' @param newallrelativeprobabs relative probability of cluster assignment of each sample
+#' @param quick if TRUE, then the runtime is quick
+# #' @param err error threshold defining when to stop
 #'
 #' @return a list containing the clusterMemberships and "assignprogress"
 #' @export
-get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepmat=NULL, blacklist=NULL, bdepar=list(chi = 0.5, edgepf = 16), categorical=FALSE, newallrelativeprobabs=NULL){
+get_clusters <- function(myData, k_clust=3, n_bg=0, quick=TRUE, EMseeds=1:3, edgepmat=NULL, blacklist=NULL, bdepar=list(chi = 0.5, edgepf = 16), newallrelativeprobabs=NULL){
 
   # measure time
   start_time <- Sys.time()
 
   startseed <- EMseeds[1]
 
-  # pre-clustering step
-  if (categorical){
+  if (missing(myData)) stop("Need a categorical matrix as input to cluster.")
+  if (!all(myData%%1==0)) stop("All categorical variables need to be specified as integers. Binary variables can be 0 or 1.")
+
+  if (!all(myData < 2)){
+    # cetegorical version
     score_type <- "bdecat"
-    # Categorical clustering
-    if(is.null(newallrelativeprobabs)){
-      nIterations <- 10
-      chi <- 0.5 # pseudocounts for the Beta prior
-      binClust <- BMMclusterEM(binaryMatrix = myData, chi = chi, k_clust = k_clust, startseed = startseed, nIterations = nIterations, verbose=TRUE)
-      newallrelativeprobabs <- binClust$relativeweights
-      newclustermembership <- binClust$newclustermembership
-      newclustermembership <- reassignsamples(newallrelativeprobabs)
-    }
   }else{
+    # binary version
     score_type <- "bde"
-    # Binary clustering
-    if(is.null(newallrelativeprobabs)){
-      nIterations <- 10
-      chi <- 0.5 # pseudocounts for the Beta prior
-      binClust <- BBMMclusterEM(binaryMatrix = myData, chi = chi, k_clust = k_clust, startseed = startseed, nIterations = nIterations, verbose=TRUE)
-      newallrelativeprobabs <- binClust$relativeweights
-      newclustermembership <- binClust$newclustermembership
-      newclustermembership <- reassignsamples(newallrelativeprobabs)
-    }
   }
+
+  #define when EM converges
+  if(quick){
+    err<-1e-6
+    nIterations <- 10
+    itLim <- 50
+  }else{
+    err<-1e-10
+    nIterations <- 30
+    itLim <- 100
+  }
+
+  # Prior Bernoulli clustering
+  if(is.null(newallrelativeprobabs)){
+    # nIterations <- 30
+    chi <- 0.5 # pseudocounts for the Beta prior
+    binClust <- get_clusters_bernoulli(binaryMatrix = myData, chi = chi, k_clust = k_clust, startseed = startseed, nIterations = nIterations, verbose=TRUE)
+    newallrelativeprobabs <- binClust$relativeweights
+    newclustermembership <- binClust$newclustermembership
+    # newclustermembership <- reassignsamples(newallrelativeprobabs)
+  }
+
+  # # pre-clustering step
+  # if (categorical){
+  #   score_type <- "bdecat"
+  #   # Categorical clustering
+  #   if(is.null(newallrelativeprobabs)){
+  #     nIterations <- 10
+  #     chi <- 0.5 # pseudocounts for the Beta prior
+  #     binClust <- BMMclusterEM(binaryMatrix = myData, chi = chi, k_clust = k_clust, startseed = startseed, nIterations = nIterations, verbose=TRUE)
+  #     newallrelativeprobabs <- binClust$relativeweights
+  #     newclustermembership <- binClust$newclustermembership
+  #     newclustermembership <- reassignsamples(newallrelativeprobabs)
+  #   }
+  # }else{
+  #   score_type <- "bde"
+  #   # Binary clustering
+  #   if(is.null(newallrelativeprobabs)){
+  #     nIterations <- 10
+  #     chi <- 0.5 # pseudocounts for the Beta prior
+  #     binClust <- BBMMclusterEM(binaryMatrix = myData, chi = chi, k_clust = k_clust, startseed = startseed, nIterations = nIterations, verbose=TRUE)
+  #     newallrelativeprobabs <- binClust$relativeweights
+  #     newclustermembership <- binClust$newclustermembership
+  #     newclustermembership <- reassignsamples(newallrelativeprobabs)
+  #   }
+  # }
 
   # # number of iterations (and respective seeds)
   # nSeeds <- 2
@@ -213,8 +248,6 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 
   # #prior pseudo counts
   # chixi<-0.5
-  #define when EM converges
-  err<-1e-6
   # #edge penalization factor
   # edgepfy<-16
   #define different seeds to run EM
@@ -238,12 +271,19 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
   relabs<-list()
   #to store cluster centers
   clustercenters<-list()
+  #to store memberships
+  newclustermembership <- list()
   #to store scores against clusters
   scoresagainstclusters<-matrix(ncol=k_clust,nrow=ss)
+  # initial cluster assignment
+  initial_newallrelativeprobabs <- newallrelativeprobabs
+  # store clustercenters
+  all_clustercenters <- list()
 
   for (s in 1:EMn) {
     diffy<-1
     cnt<-1
+    newallrelativeprobabs <- initial_newallrelativeprobabs
     assignprogress[[s]]<-list()
     assignprogress_local<-list()
     # assignprogress_local$corrvec<-numeric()
@@ -255,7 +295,6 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
       # centers[[i]]<-as.data.frame(matrix(ncol=3))
       clustercenters[[i]]<-matrix(rep(0,(n+n_bg)^2),nrow=n+n_bg)
     }
-
 
     # if(!BBMMClust){
     #   #generate random assignment of belonging to each cluster for each sample
@@ -337,7 +376,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
       }
 
       diffy<-sum((allprobprev-newallrelativeprobabs)^2)
-      newclustermembership<-reassignsamples(newallrelativeprobabs)
+      newclustermembership[[s]]<-reassignsamples(newallrelativeprobabs)
       # res<-checkmembership(k_clust,kclusttrue=3,truelabels,newclustermembership)
       # assignprogress_local$corrvec[cnt]<-res$ncorr
       assignprogress_local$likel[cnt]<-calcloglike(scoresagainstclusters,tauvec)
@@ -357,16 +396,32 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
     scoresprogress[[s]]<-scoresagainstclusters
     probs[[s]]<-newallrelativeprobabs
     # relabs[[s]]<-res$relabel
+    all_clustercenters[[s]] <- clustercenters
   }
+
+  # assignprogress[[s]]$likel[length(cluster_res_t$assignprogress$likel)]
+
+  if(EMn>1){
+    bestSeed <- getBestSeed(assignprogress)
+    newallrelativeprobabs <- probs[[bestSeed]]
+    assignprogress <- assignprogress[[bestSeed]]
+    clustercenters <- all_clustercenters[[bestSeed]]
+    newclustermembership <- newclustermembership[[bestSeed]]
+    names(newclustermembership) <- rownames(myData)
+    print(paste0("Best seed: ", bestSeed))
+  }
+
+  #   # get best performing seed
+  #   assignprogressList <- lapply(clusterResAll, function(x) x[[2]][[1]])
+  #   bestSeed <- getBestSeed(assignprogressList)
+  #   bestRes <- clusterResAll[[bestSeed]]
 
   # measure time
   end_time <- Sys.time()
 
-  print(paste0("Computation time: ",as.numeric(end_time-start_time)))
+  print(paste0("Computation time: ",round(as.numeric(difftime(end_time, start_time, units='mins')), digits = 2), " mins"))
 
-  names(newclustermembership) <- rownames(myData)
-
-  return(list("clustermembership"=newclustermembership,"assignprogress"=assignprogress, "DAGs"=clustercenters, "newallrelativeprobabs"=newallrelativeprobabs))
+  return(list("clustermembership"=newclustermembership,"assignprogress"=assignprogress, "DAGs"=clustercenters, "probs"=newallrelativeprobabs))
 }
 
 
@@ -575,7 +630,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # }
 
 
-# #' @title netClustParallel
+# #' @title graphClustParallel
 # #'
 # #' @description Network-based clustering of multiple seeds using parallel computing
 # #'
@@ -590,7 +645,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # #' @return a list containing the clusterMemberships, DAGs, best seed and "assignprogress"
 # #' @export
 # #'
-# netClustParallel <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1:5, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
+# graphClustParallel <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1:5, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
 #
 #   # parallel computing of clustering
 #   nSeeds <- length(EMseeds)
@@ -629,7 +684,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # }
 
 
-# #' @title netCluster
+# #' @title graphCluster
 # #'
 # #' @description Network-based clustering
 # #'
@@ -644,7 +699,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # #'
 # #' @return a list containing the clusterMemberships and "assignprogress"
 # #' @export
-# netCluster <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1, BBMMClust=TRUE, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
+# graphCluster <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1, BBMMClust=TRUE, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
 #
 #   # Binary clustering
 #   startseed <- EMseeds[1]
@@ -824,7 +879,7 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # }
 
 
-# #' @title netClusterParallel
+# #' @title graphClusterParallel
 # #'
 # #' @description Network-based clustering of multiple seeds using parallel computing
 # #'
@@ -840,13 +895,13 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 # #' @return a list containing the clusterMemberships, DAGs, best seed and "assignprogress"
 # #' @export
 # #'
-# netClusterParallel <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1:5, BBMMClust=TRUE, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
+# graphClusterParallel <- function(myData,k_clust=3,n_bg=0,itLim=20, EMseeds=1:5, BBMMClust=TRUE, edgepmat=NULL, bdepar=list(chi = 0.5, edgepf = 16)){
 #
 #   # parallel computing of clustering
 #   nSeeds <- length(EMseeds)
 #   clusterResAll <- parallel::mclapply(1:nSeeds, function(i) {
 #     print(paste("Clustering iteration", i, "of", nSeeds))
-#     clusterRes <- netCluster(myData=myData,k_clust=k_clust,n_bg=n_bg,itLim=itLim, EMseeds=EMseeds[i], BBMMClust=BBMMClust, edgepmat=edgepmat, bdepar=bdepar)
+#     clusterRes <- graphCluster(myData=myData,k_clust=k_clust,n_bg=n_bg,itLim=itLim, EMseeds=EMseeds[i], BBMMClust=BBMMClust, edgepmat=edgepmat, bdepar=bdepar)
 #     return(clusterRes)
 #   }, mc.cores = nSeeds)
 #
@@ -858,3 +913,4 @@ get_clusters <- function(myData, k_clust=3, n_bg=0, itLim=50, EMseeds=1, edgepma
 #   # return results of best seed
 #   return(list("clustermembership"=bestRes$clustermembership,"assignprogress"=bestRes$assignprogress,"DAGs"=bestRes$DAGs,"bestSeed"=bestSeed))
 # }
+

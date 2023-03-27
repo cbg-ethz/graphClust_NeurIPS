@@ -8,12 +8,11 @@ get_clusters(
   myData,
   k_clust = 3,
   n_bg = 0,
-  itLim = 50,
-  EMseeds = 1,
+  quick = TRUE,
+  EMseeds = 1:3,
   edgepmat = NULL,
   blacklist = NULL,
   bdepar = list(chi = 0.5, edgepf = 16),
-  categorical = FALSE,
   newallrelativeprobabs = NULL
 )
 }
@@ -24,11 +23,13 @@ get_clusters(
 
 \item{n_bg}{Number of covariates}
 
-\item{itLim}{Maximum number of iterations}
+\item{quick}{if TRUE, then the runtime is quick}
 
 \item{EMseeds}{Seeds}
 
 \item{edgepmat}{Matrix of penalized edges in the search space}
+
+\item{blacklist}{Matrix of forbidden edges in the search space}
 
 \item{bdepar}{Hyperparameters for structure learning (BDE score)}
 

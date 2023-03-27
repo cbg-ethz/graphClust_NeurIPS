@@ -12,7 +12,7 @@ Installation
 
 In order to install the package, it suffices to launch
 `
-R CMD INSTALL path/to/netClust
+R CMD INSTALL path/to/graphClust
 `
 from a terminal, or `make install` from within the package source folder.
 
@@ -27,7 +27,7 @@ library("devtools")
 install_github("cbg-ethz/graphClust_NeurIPS")
 ```
 
-`netClust` requires R `>= 3.5`, and depends on 
+`graphClust` requires R `>= 3.5`, and depends on 
 `pcalg`, `reshape2`, `BiDAG` (>= 2.0.2),
 `RBGL`, `clue` and `grDevices`.
 
