@@ -5,21 +5,26 @@ Version: 1.0.1
 Author: Fritz Bayer, Jack Kuipers
 Maintainer: Fritz Bayer <frbayer@ethz.ch>
 Description: Network-based clustering using a Bayesian network mixture model with optional covariate adjustment.
-License: GPL-3
+License: GPL-3 | file LICENSE
 Depends:
     R (>= 3.5.0)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports: 
-    ggplot2,
-    reshape2,
     BiDAG (>= 2.0.2),
     pcalg,
     RBGL,
     clue,
     grDevices,
-    graph
+    graph,
+    ggplot2,
+    reshape2,
+    igraph,
+    ggraph,
+    ggpubr
+Config/testthat/edition: 3
