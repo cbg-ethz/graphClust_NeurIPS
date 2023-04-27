@@ -4,7 +4,7 @@
 \alias{nice_DAG_plot}
 \title{nice_DAG_plot}
 \usage{
-nice_DAG_plot(my_graph, print_direct = TRUE)
+nice_DAG_plot(my_graph, print_direct = TRUE, node_size = NULL)
 }
 \arguments{
 \item{my_graph}{DAG}
