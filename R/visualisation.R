@@ -98,7 +98,7 @@ plot_clusters <- function(cluster_results, data=NULL){
   for (ii in 1:k_clust){
     my_graph <- graph_from_adjacency_matrix(cluster_results$DAGs[ii][[1]], mode="directed")
     # my_graph <- igraph::graph_from_adjacency_matrix(cluster_results$DAGs[ii][[1]], mode="directed")
-    p_list[[ii]] <- nice_DAG_plot(my_graph, print_direct=FALSE, node_size=node_size[k_clust,])
+    p_list[[ii]] <- nice_DAG_plot(my_graph, print_direct=FALSE, node_size=node_size[ii,])
   }
   ggarrange(plotlist=p_list, labels = paste("Cluster", LETTERS[1:k_clust]))#, ncol = 2, nrow = 2)
 }
