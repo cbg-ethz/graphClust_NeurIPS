@@ -3,7 +3,7 @@
 #'
 #' @description DAG visualization
 #'
-#' @param my_graph DAG
+#' @param my_DAG DAG
 #' @param print_direct print DAG if TRUE
 #' @param node_size node size vector
 #' @param CPDAG if TRUE, then plot CPDAG instead of DAG
@@ -66,6 +66,7 @@ nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE)
 #' @description Plot clusters
 #'
 #' @param cluster_results Cluster results
+#' @param data data
 #'
 #' @export
 #' @importFrom igraph graph_from_adjacency_matrix
