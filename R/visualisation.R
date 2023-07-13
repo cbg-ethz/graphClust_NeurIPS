@@ -12,10 +12,18 @@
 #'
 #' @export
 #'
-#' @importFrom ggraph ggraph geom_edge_arc geom_node_point geom_node_text circle
+# #' @importFrom ggraph ggraph geom_edge_arc geom_node_point geom_node_text circle
 #' @importFrom igraph V
+#' @importFrom methods as
 nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE, node_colours="#fdae61", directed=TRUE){
 
+  if (!requireNamespace("ggraph", quietly = TRUE)) {
+    stop(
+      "Package \"ggraph\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+  
   # set node size if not specified
   if(is.null(node_size)){
     node_size <- 3.5
@@ -47,22 +55,22 @@ nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE,
   # Type <- as.factor(grp)
 
   
-  p1 <- ggraph(my_graph, layout="circle")+
-    geom_edge_arc(arrow = arrow(length = unit(arrowsize, 'mm')),
-                  start_cap = circle(2.3, 'mm'),
-                  end_cap = circle(2, 'mm'),
-                  edge_colour="black", edge_alpha=0.6, edge_width=0.4, aes(circular=TRUE)) +
-    geom_node_point(size=node_size, color=node_colours, alpha=0.9) +
-    geom_node_text(aes(label=paste("    ",name,"    "),
+  p1 <- ggraph::ggraph(my_graph, layout="circle")+
+    ggraph::geom_edge_arc(arrow = ggplot2::arrow(length = ggplot2::unit(arrowsize, 'mm')),
+                  start_cap = ggraph::circle(2.3, 'mm'),
+                  end_cap = ggraph::circle(2, 'mm'),
+                  edge_colour="black", edge_alpha=0.6, edge_width=0.4, ggplot2::aes(circular=TRUE)) +
+    ggraph::geom_node_point(size=node_size, color=node_colours, alpha=0.9) +
+    ggraph::geom_node_text(ggplot2::aes(label=paste("    ",name,"    "),
                        angle=angle, hjust=hjust), size=2.3, color="black") +
-    theme_void() +
+    ggplot2::theme_void() +
     # theme(
     #   # legend.position="none",
     #   plot.margin=unit(c(0,0,0,0), "null"),
     #   panel.spacing=unit(c(0,0,0,0), "null")
     # ) +
-    expand_limits(x = c(-1.2, 1.2), y = c(-1.2, 1.2)) +
-    coord_fixed()
+    ggplot2::expand_limits(x = c(-1.2, 1.2), y = c(-1.2, 1.2)) +
+    ggplot2::coord_fixed()
 
   if(print_direct){
     print(p1)
@@ -94,8 +102,15 @@ entropy <- function(cat.vect){
 #'
 #' @export
 #' @importFrom igraph graph_from_adjacency_matrix
-#' @importFrom ggpubr ggarrange
+# #' @importFrom ggpubr ggarrange
 plot_clusters <- function(cluster_results, data=NULL, node_colours="#fdae61", binary_cols = TRUE, directed=TRUE){
+  
+  if (!requireNamespace("ggpubr", quietly = TRUE)) {
+    stop(
+      "Package \"ggpubr\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
   
   node_size <- NULL
   # if entropy should define the size
@@ -179,7 +194,7 @@ plot_clusters <- function(cluster_results, data=NULL, node_colours="#fdae61", bi
     # my_graph <- igraph::graph_from_adjacency_matrix(cluster_results$DAGs[ii][[1]], mode="directed")
     p_list[[ii]] <- nice_DAG_plot(my_DAG, print_direct=FALSE, node_size=node_size[ii,], node_colours=node_colours, directed=directed)
   }
-  ggarrange(plotlist=p_list, labels = paste("Cluster", LETTERS[1:k_clust]))#, ncol = 2, nrow = 2)
+  ggpubr::ggarrange(plotlist=p_list, labels = paste("Cluster", LETTERS[1:k_clust]))#, ncol = 2, nrow = 2)
 }
 
 

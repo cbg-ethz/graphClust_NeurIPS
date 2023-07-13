@@ -13,6 +13,11 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
+    ggraph,
+    ggpubr,
+    ggplot2,
+    grDevices,
+    reshape2,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports: 
@@ -20,11 +25,7 @@ Imports:
     pcalg,
     RBGL,
     clue,
-    grDevices,
+    methods,
     graph,
-    ggplot2,
-    reshape2,
-    igraph,
-    ggraph,
-    ggpubr
+    igraph
 Config/testthat/edition: 3
