@@ -8,12 +8,13 @@
 #' @param node_size node size vector
 #' @param CPDAG if TRUE, then plot CPDAG instead of DAG
 #' @param node_colours node colours
+#' @param directed TRUE if nodes should be directed
 #'
 #' @export
 #'
 #' @importFrom ggraph ggraph geom_edge_arc geom_node_point geom_node_text circle
 #' @importFrom igraph V
-nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE, node_colours="#fdae61"){
+nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE, node_colours="#fdae61", directed=TRUE){
 
   # set node size if not specified
   if(is.null(node_size)){
@@ -27,7 +28,15 @@ nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE,
   }
 
   my_graph <- igraph::graph_from_adjacency_matrix(my_DAG, mode="directed")
-
+  
+  if(directed==TRUE){
+    # my_graph <- igraph::graph_from_adjacency_matrix(my_DAG, mode="directed")
+    arrowsize <- 2.3
+  }else{
+    # my_graph <- igraph::graph_from_adjacency_matrix(my_DAG, mode="undirected")
+    arrowsize <- 0
+  }
+  
   # add labelling
   number_of_bar=length(my_graph)
   id = seq(1, length(my_graph))
@@ -37,8 +46,9 @@ nice_DAG_plot <- function(my_DAG, print_direct=TRUE, node_size=NULL, CPDAG=TRUE,
   name <- names(igraph::V(my_graph))
   # Type <- as.factor(grp)
 
+  
   p1 <- ggraph(my_graph, layout="circle")+
-    geom_edge_arc(arrow = arrow(length = unit(2.3, 'mm')),
+    geom_edge_arc(arrow = arrow(length = unit(arrowsize, 'mm')),
                   start_cap = circle(2.3, 'mm'),
                   end_cap = circle(2, 'mm'),
                   edge_colour="black", edge_alpha=0.6, edge_width=0.4, aes(circular=TRUE)) +
@@ -80,11 +90,12 @@ entropy <- function(cat.vect){
 #' @param data data
 #' @param node_colours node colours
 #' @param binary_cols Input can be a vector of the binary variables; if "TRUE", the binary variables are automatically determined; if NULL, then entropy will be used only
+#' @param directed TRUE if nodes should be directed
 #'
 #' @export
 #' @importFrom igraph graph_from_adjacency_matrix
 #' @importFrom ggpubr ggarrange
-plot_clusters <- function(cluster_results, data=NULL, node_colours="#fdae61", binary_cols = TRUE){
+plot_clusters <- function(cluster_results, data=NULL, node_colours="#fdae61", binary_cols = TRUE, directed=TRUE){
   
   node_size <- NULL
   # if entropy should define the size
@@ -166,7 +177,7 @@ plot_clusters <- function(cluster_results, data=NULL, node_colours="#fdae61", bi
     # my_graph <- graph_from_adjacency_matrix(cluster_results$DAGs[ii][[1]], mode="directed")
     my_DAG <- cluster_results$DAGs[ii][[1]]
     # my_graph <- igraph::graph_from_adjacency_matrix(cluster_results$DAGs[ii][[1]], mode="directed")
-    p_list[[ii]] <- nice_DAG_plot(my_DAG, print_direct=FALSE, node_size=node_size[ii,], node_colours=node_colours)
+    p_list[[ii]] <- nice_DAG_plot(my_DAG, print_direct=FALSE, node_size=node_size[ii,], node_colours=node_colours, directed=directed)
   }
   ggarrange(plotlist=p_list, labels = paste("Cluster", LETTERS[1:k_clust]))#, ncol = 2, nrow = 2)
 }
