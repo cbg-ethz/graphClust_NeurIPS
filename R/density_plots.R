@@ -1,6 +1,14 @@
 
-
-density_plot <- function(test_results){
+#' @title density_plot
+#'
+#' @description Create 2d visualisation of sample fit to Bayesian network clusters
+#'
+#' @param cluster_results Cluster results from function get_clusters
+#' @param var_selection Selected variables to consider, e.g. c(1:5) for first five only
+#'
+#' @export
+# #' @importFrom igraph graph_from_adjacency_matrix
+density_plot <- function(cluster_results, var_selection = NULL){
   
   if (!requireNamespace("car", quietly = TRUE)) {
     stop(
@@ -15,11 +23,36 @@ density_plot <- function(test_results){
       call. = FALSE
     )
   }
+
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop(
+      "Package \"ggplot2\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
   
-  test_data <- test_results$data
+  if (!requireNamespace("graphics", quietly = TRUE)) {
+    stop(
+      "Package \"graphics\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+  
+  if (!requireNamespace("stats", quietly = TRUE)) {
+    stop(
+      "Package \"stats\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+  
+  if (is.null(var_selection)){
+    var_selection <- 1:dim(cluster_results$data)[2]
+  }
+  
+  test_data <- cluster_results$data[,var_selection]
   
   # process input data
-  clustermembership <- as.factor(test_results$clustermembership)
+  clustermembership <- as.factor(cluster_results$clustermembership)
   levels(clustermembership) <- LETTERS[1:length(levels(clustermembership))]
   levelly <- levels(clustermembership)
   
@@ -28,16 +61,16 @@ density_plot <- function(test_results){
   # levelly2 <- levels(cancer_type)
   # colourys2 <- c("#DD7788", "#771122", "#117777", "#DDDD77")
   
-  k_clust <- length(test_results$DAGs)
+  k_clust <- length(cluster_results$DAGs)
   
   # Calculate scores against clusters
   scoresagainstclusters <- matrix(NA,dim(test_data)[1],k_clust)
   for (k in 1:k_clust){
     allrelativeprobabs <- rep(0, dim(test_data)[1])
-    allrelativeprobabs[test_results$clustermembership==k] <- 1
+    allrelativeprobabs[cluster_results$clustermembership==k] <- 1
   
     scorepar <- BiDAG::scoreparameters("bdecat", as.data.frame(test_data), weightvector = allrelativeprobabs) #, bdepar = bdepar)
-    scoresagainstclusters[,k] <- BiDAG::scoreagainstDAG(scorepar,test_results$DAGs[[k]],test_data, bdecatCvec = apply(test_data, 2, function(x) length(unique(x))))
+    scoresagainstclusters[,k] <- BiDAG::scoreagainstDAG(scorepar,cluster_results$DAGs[[k]][var_selection,var_selection],test_data, bdecatCvec = apply(test_data, 2, function(x) length(unique(x))))
   }
   
   # Calculate divergence matrix
@@ -57,21 +90,27 @@ density_plot <- function(test_results){
   }
   
   # Perform multidimensional scaling
-  reducey <- cmdscale(divergy, k=2)
+  reducey <- stats::cmdscale(divergy, k=2)
   
   # plot(reducey, col=cancer_type+1)
   
   # Set colors and plotting parameters
-  colourys<-c("#202020","#774411","#DDAA77","#ed2124","#114477","#CC99BB",
-                       "#88CCAA","#117744","#77AADD")
+  # colourys<-c("#202020","#774411","#DDAA77","#ed2124","#114477","#CC99BB",
+  #                      "#88CCAA","#117744","#77AADD")
   
-  colourys3<-alpha(colourys,0.3)
-  par(mar = c(0,0,0,0))
+  colourys<-c("#202020","#771122","#AA4455","#DD7788","#774411","#AA7744",
+                       "#DDAA77","#777711","#AAAA44","#DDDD77","#117744","#44AA77",
+                       "#88CCAA","#117777","#44AAAA","#77CCCC","#114477","#4477AA",
+                       "#77AADD","#771155","#AA4488","#CC99BB")
+  
+  
+  colourys3<-ggplot2::alpha(colourys,0.3)
+  graphics::par(mar = c(0,0,0,0))
   
   xlims<-c(1.08*min(reducey[,1]), max(reducey[,1]))
   ylims<-c(min(reducey[,2]), max(reducey[,2]))
   
-  par(bty = 'n')
+  graphics::par(bty = 'n')
   plot(1, type="n", axes=F, xlab="", ylab="",xlim=xlims,ylim=ylims, bty="n")
   
   textheights<-(ylims[2]-ylims[1])*rev(1*((c(1:16)-1.5)/(16-1))) +ylims[1]
@@ -83,12 +122,12 @@ density_plot <- function(test_results){
     selecteddots<-which(clustermembership==levelly[k])
     combdata<-reducey[selecteddots,]
   
-    z <- kde(combdata)
+    z <- ks::kde(combdata)
   
     plot(z,display="filled.contour2",add=TRUE,cont=c(50),col=c("transparent",paste0(colourys[k],"66")), alpha=0.3, drawpoints=FALSE,drawlabels=FALSE,lwd=1.5, bty="n")
   
-    points(textxs,textheights[k],col=colourys[k],pch=19,cex=1.5)
-    text(textxs,textheights[k],levelly[k],pos=4)
+    graphics::points(textxs,textheights[k],col=colourys[k],pch=19,cex=1.5)
+    graphics::text(textxs,textheights[k],levelly[k],pos=4)
   
   }
   
@@ -120,12 +159,14 @@ density_plot <- function(test_results){
   for(k in 1:k_clust){
     selecteddots<-which(clustermembership==levelly[k])
   
-    points(reducey[selecteddots,1],reducey[selecteddots,2],col=colourys[k],pch=19,cex=0.5)
+    graphics::points(reducey[selecteddots,1],reducey[selecteddots,2],col=colourys[k],pch=19,cex=0.5)
   
     # points(textxs,textheights[k],col=colourys[k],pch=19,cex=1.5)
-    # text(textxs,textheights[k],levelly[k],pos=4)
+    # graphics::text(textxs,textheights[k],levelly[k],pos=4)
   
   }
   
-  # transparent_plot <- recordPlot()
+  transparent_plot <- grDevices::recordPlot()
+  
+  return(transparent_plot)
 }

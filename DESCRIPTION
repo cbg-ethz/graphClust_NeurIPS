@@ -18,6 +18,8 @@ Suggests:
     ggplot2,
     grDevices,
     reshape2,
+    car,
+    ks,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports: 
